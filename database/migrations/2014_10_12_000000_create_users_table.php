@@ -19,10 +19,15 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('role')->default('user'); // or use ENUM type if you want predefined roles
+            $table->boolean('is_admin')->default(false);
+            $table->enum('status', ['active', 'inactive', 'suspended'])->default('active');
+            $table->json('permissions')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
     }
+
 
     /**
      * Reverse the migrations.
