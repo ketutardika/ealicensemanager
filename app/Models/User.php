@@ -21,6 +21,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'status',
+        'permissions',
+        'is_admin'
     ];
 
     /**
@@ -40,5 +44,18 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'permissions' => 'array',
     ];
+
+    // Role check helper method
+    public function hasRole($role)
+    {
+        return $this->role === $role;
+    }
+
+    // Check if user has a specific permission
+    public function hasPermission($permission)
+    {
+        return in_array($permission, $this->permissions ?? []);
+    }
 }
