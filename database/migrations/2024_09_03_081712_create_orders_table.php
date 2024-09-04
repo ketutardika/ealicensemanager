@@ -22,7 +22,6 @@ return new class extends Migration
             $table->string('language')->nullable();
             $table->dateTime('transaction_date');
             $table->string('subscription_id')->nullable();
-            $table->string('language')->nullable();
             $table->timestamps();
         });
     }
