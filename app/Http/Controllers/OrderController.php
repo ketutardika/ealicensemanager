@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use Illuminate\Http\Request;
 
+use Carbon\Carbon; // Import Carbon for date manipulation
+
 class OrderController extends Controller
 {
     public function index()
@@ -16,13 +18,28 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'order_id' => 'required|integer',
+            'user_id' => 'required|integer',
             'product_id' => 'required|integer',
-            'product_name' => 'required|string|max:255',
-            'transaction_date' => 'required|date',
+            'product_name' => 'required|string',
+            'language' => 'string|max:255',
+            'status' => 'required|string',
         ]);
 
-        $order = Order::create($request->all());
+        // Convert the transaction_date to the correct format for MySQL
+        $transactionDate = Carbon::parse($request->input('transaction_date'))->format('Y-m-d H:i:s');
+
+        // Create the new order
+        $order = Order::create([
+            'order_id' => $request->input('order_id'),
+            'user_id' => $request->input('user_id'),
+            'product_id' => $request->input('product_id'),
+            'product_name' => $request->input('product_name'),
+            'transaction_date' => $transactionDate,            
+            'language' => $request->input('language'),
+            'subscription_id'=> $request->input('status'),
+            'status' => $request->input('status'),
+        ]);
 
         return response()->json($order, 201);
     }
@@ -39,9 +56,10 @@ class OrderController extends Controller
 
         $request->validate([
             'user_id' => 'exists:users,id',
+            'order_id' => 'integer',
             'product_id' => 'integer',
             'product_name' => 'string|max:255',
-            'transaction_date' => 'date',
+            'language' => 'string|max:255',
         ]);
 
         $order->update($request->all());

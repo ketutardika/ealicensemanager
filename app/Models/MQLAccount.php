@@ -15,4 +15,7 @@ class MQLAccount extends Model
         'status',
         'validation_status',
     ];
+
+    // Specify the table name
+    protected $table = 'mql_accounts';
 }

@@ -19,8 +19,10 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users');
             $table->integer('product_id')->nullable();
             $table->string('product_name')->nullable();
+            $table->string('language')->nullable();
             $table->dateTime('transaction_date');
             $table->string('subscription_id')->nullable();
+            $table->string('language')->nullable();
             $table->timestamps();
         });
     }

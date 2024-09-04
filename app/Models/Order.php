@@ -14,6 +14,7 @@ class Order extends Model
         'user_id',
         'product_id',
         'product_name',
+        'language',
         'transaction_date',
     ];
 }

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->integer('account_quota')->default(1);
             $table->integer('used_quota')->default(0);
             $table->dateTime('license_creation_date');
-            $table->enum('license_expiration', ['1 month', '3 months', '1 year'])->default('1 month');
+            $table->enum('license_expiration', ['1 month','3 months','6 months','1 year','2 years','3 years','lifetime'])->default('lifetime');
             $table->dateTime('license_expiration_date')->nullable();
             $table->enum('status', ['active', 'expired'])->default('active');
             $table->string('source')->nullable();

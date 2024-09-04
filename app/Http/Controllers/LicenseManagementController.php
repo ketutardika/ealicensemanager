@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
+use Carbon\Carbon; // Import Carbon for date manipulation
+
 class LicenseManagementController extends Controller
 {
     public function handleOrderComplete(Request $request)
@@ -20,6 +22,9 @@ class LicenseManagementController extends Controller
         $request->validate([
             'order_id' => 'required|string',
             'product_id' => 'required|integer',
+            'language' => 'nullable|string',
+            'account_quota' => 'required|string',
+            'license_expiration' => 'required|string',        
             'billing.email' => 'required|email',
             'billing.first_name' => 'nullable|string',
             'billing.last_name' => 'nullable|string',
@@ -60,20 +65,24 @@ class LicenseManagementController extends Controller
             [
                 'user_id' => $user->id,
                 'product_id' => $request->product_id,
+                'language' => $request->language,
                 'order_id' => $request->order_id, // Explicitly set order_id here to ensure it is saved
                 'transaction_date' => now(),
             ]
         );
 
+        // Determine license expiration date based on license_expiration value
+        $licenseExpiration = $this->calculateLicenseExpirationDate($request->input('license_expiration'));
+
         // Generate a license for the user
         $license = License::create([
             'user_id' => $user->id,
             'license_key' => $this->generateLicenseKey(),
-            'account_quota' => 10, // Default quota per license
+            'account_quota' => $request->input('account_quota'),
             'used_quota' => 0,
             'license_creation_date' => now(),
-            'license_expiration' => '1 year', // Default expiration
-            'license_expiration_date' => now()->addYear(),
+            'license_expiration' => $request->input('license_expiration'),
+            'license_expiration_date' => $licenseExpiration,
             'status' => 'active',
         ]);
 
@@ -98,5 +107,27 @@ class LicenseManagementController extends Controller
         }
 
         return $licenseKey;
+    }
+
+    private function calculateLicenseExpirationDate($licenseExpiration)
+    {
+        switch ($licenseExpiration) {
+            case '1 month':
+                return Carbon::now()->addMonth();
+            case '3 months':
+                return Carbon::now()->addMonths(3);
+            case '6 months':
+                return Carbon::now()->addMonths(6);
+            case '1 year':
+                return Carbon::now()->addYear();
+            case '2 years':
+                return Carbon::now()->addYears(2);
+            case '3 years':
+                return Carbon::now()->addYears(3);
+            case 'lifetime':
+                return null; // No expiration for lifetime
+            default:
+                return Carbon::now()->addYear(); // Default to 1 year if not specified
+        }
     }
 }

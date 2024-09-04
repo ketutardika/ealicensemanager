@@ -19,7 +19,7 @@ class LicenseController extends Controller
             'user_id' => 'required|exists:users,id',
             'license_key' => 'required|string|unique:licenses,license_key',
             'account_quota' => 'required|integer|min:1',
-            'license_expiration' => 'required|in:1 month,3 months,1 year',
+            'license_expiration' => 'required|string',
         ]);
 
         $license = License::create($request->all());
@@ -41,7 +41,7 @@ class LicenseController extends Controller
             'user_id' => 'exists:users,id',
             'license_key' => 'string|unique:licenses,license_key,' . $license->id,
             'account_quota' => 'integer|min:1',
-            'license_expiration' => 'in:1 month,3 months,1 year',
+            'license_expiration' => 'required|string',
         ]);
 
         $license->update($request->all());
