@@ -23,7 +23,7 @@ return new class extends Migration
             $table->enum('license_expiration', ['1 month','3 months','6 months','1 year','2 years','3 years','lifetime'])->default('lifetime');
             $table->dateTime('license_expiration_date')->nullable();
             $table->enum('status', ['active', 'expired'])->default('active');
-            $table->string('source')->nullable();
+            $table->json('source')->nullable();
             $table->string('subscription_id')->nullable();
             $table->enum('subscription_status', ['active', 'expired', 'cancelled', 'on-hold', 'pending-cancellation'])->default('active');
             $table->dateTime('renewal_date')->nullable();

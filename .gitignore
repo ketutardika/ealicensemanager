@@ -15,3 +15,5 @@ yarn-error.log
 /.idea
 /.vscode
 /.vagrant
+/.htaccess
+/default.php
