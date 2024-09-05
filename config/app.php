@@ -40,6 +40,7 @@ return [
     */
 
     'debug' => (bool) env('APP_DEBUG', false),
+    'disable_web_routes' => env('DISABLE_WEB_ROUTES', false),
 
     /*
     |--------------------------------------------------------------------------

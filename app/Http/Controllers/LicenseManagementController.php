@@ -27,7 +27,8 @@ class LicenseManagementController extends Controller
             'currency' => 'required|string|size:3', // Validate currency as a required string of 3 characters            
             'account_quota' => 'required|string',
             'license_expiration' => 'required|string',
-            'language' => 'nullable|string',     
+            'language' => 'nullable|string',    
+            'source' => 'required|json', 
             'billing.email' => 'required|email',
             'billing.first_name' => 'nullable|string',
             'billing.last_name' => 'nullable|string',
@@ -74,6 +75,7 @@ class LicenseManagementController extends Controller
                 'transaction_date' => now(),
                 'total_purchase' => $request->total_purchase, // Store the total purchase amount
                 'currency' => $request->currency, // Store the currency used for the transaction
+                'source' => $request->input('source'),
             ]
         );
 
@@ -86,6 +88,7 @@ class LicenseManagementController extends Controller
             'license_key' => $this->generateLicenseKey(),
             'account_quota' => $request->input('account_quota'),
             'used_quota' => 0,
+            'source' => $request->input('source'),
             'license_creation_date' => now(),
             'license_expiration' => $request->input('license_expiration'),
             'license_expiration_date' => $licenseExpiration,

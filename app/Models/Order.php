@@ -18,5 +18,6 @@ class Order extends Model
         'currency',
         'language',
         'transaction_date',
+        'source',
     ];
 }
