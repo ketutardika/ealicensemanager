@@ -22,9 +22,12 @@ class LicenseManagementController extends Controller
         $request->validate([
             'order_id' => 'required|string',
             'product_id' => 'required|integer',
-            'language' => 'nullable|string',
+            'product_name'=> 'required|string',
+            'total_purchase' => 'required|numeric', // Validate total purchase as a required numeric field
+            'currency' => 'required|string|size:3', // Validate currency as a required string of 3 characters            
             'account_quota' => 'required|string',
-            'license_expiration' => 'required|string',        
+            'license_expiration' => 'required|string',
+            'language' => 'nullable|string',     
             'billing.email' => 'required|email',
             'billing.first_name' => 'nullable|string',
             'billing.last_name' => 'nullable|string',
@@ -65,9 +68,12 @@ class LicenseManagementController extends Controller
             [
                 'user_id' => $user->id,
                 'product_id' => $request->product_id,
+                'product_name'=> $request->product_name,
                 'language' => $request->language,
                 'order_id' => $request->order_id, // Explicitly set order_id here to ensure it is saved
                 'transaction_date' => now(),
+                'total_purchase' => $request->total_purchase, // Store the total purchase amount
+                'currency' => $request->currency, // Store the currency used for the transaction
             ]
         );
 

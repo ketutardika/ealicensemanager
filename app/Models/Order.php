@@ -14,8 +14,9 @@ class Order extends Model
         'user_id',
         'product_id',
         'product_name',
+        'total_purchase',
+        'currency',
         'language',
         'transaction_date',
     ];
 }
-
