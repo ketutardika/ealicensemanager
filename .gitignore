@@ -17,3 +17,4 @@ yarn-error.log
 /.vagrant
 /.htaccess
 /default.php
+/public/index.php
