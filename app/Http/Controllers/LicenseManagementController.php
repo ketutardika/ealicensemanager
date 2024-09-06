@@ -101,9 +101,7 @@ class LicenseManagementController extends Controller
             'message' => 'License created successfully',
             'license_key' => $license->license_key,
             'account_quota' => $license->account_quota,
-            'license_expiration' => $license->license_expiration,
-            'email' => $user->email,
-            'password' => $generatedPassword // Send plain text password (should be temporary and user should be prompted to change it)
+            'license_expiration' => $license->license_expiration
         ], 201);
     }
 
