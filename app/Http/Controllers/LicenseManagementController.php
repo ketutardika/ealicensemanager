@@ -99,6 +99,7 @@ class LicenseManagementController extends Controller
          // Respond back to the client with additional information
         return response()->json([
             'message' => 'License created successfully',
+            'email' => $user->email,
             'license_key' => $license->license_key,
             'account_quota' => $license->account_quota,
             'license_expiration' => $license->license_expiration
