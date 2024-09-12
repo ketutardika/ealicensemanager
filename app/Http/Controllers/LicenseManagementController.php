@@ -80,12 +80,18 @@ class LicenseManagementController extends Controller
             ]
         );
 
+        // Ensure that the order has an ID (this should be set after `updateOrCreate`)
+        if (!$order || !$order->id) {
+            return response()->json(['message' => 'Failed to create or retrieve the order.'], 400);
+        }
+
         // Determine license expiration date based on license_expiration value
         $licenseExpiration = $this->calculateLicenseExpirationDate($request->input('license_expiration'));
 
         // Generate a license for the user
         $license = License::create([
             'user_id' => $user->id,
+            'order_id' => $order->id,  // Associate the license with the order
             'license_key' => $this->generateLicenseKey(),
             'account_quota' => $request->input('account_quota'),
             'used_quota' => 0,
@@ -102,7 +108,7 @@ class LicenseManagementController extends Controller
             'email' => $user->email,
             'license_key' => $license->license_key,
             'account_quota' => $license->account_quota,
-            'license_expiration' => $license->license_expiration
+            'license_expiration' => $license->license_expiration,
         ], 201);
     }
 

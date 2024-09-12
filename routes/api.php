@@ -49,6 +49,13 @@ Route::prefix('v1')->group(function () {
         Route::get('/licenses/{id}', [LicenseController::class, 'show']);
         Route::put('/licenses/{id}', [LicenseController::class, 'update']);
         Route::delete('/licenses/{id}', [LicenseController::class, 'destroy']);
+        // New Route for Toggling License Status
+        Route::put('/licenses/{id}/status', [LicenseController::class, 'toggleStatus']);
+        // Route to handle POST request for licenses by email
+        Route::post('/licenses/email', [LicenseController::class, 'getLicensesByEmail']);
+
+
+
 
         // Order Management
         Route::get('/orders', [OrderController::class, 'index']);
@@ -63,6 +70,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/mql-accounts/{id}', [MQLAccountController::class, 'show']);
         Route::put('/mql-accounts/{id}', [MQLAccountController::class, 'update']);
         Route::delete('/mql-accounts/{id}', [MQLAccountController::class, 'destroy']);
+        Route::get('/mql-accounts/license/{license_id}', [MqlAccountController::class, 'getMqlAccountsByLicense']);
+
 
         // Order Completion and License Creation
         Route::post('/order-completed', [LicenseManagementController::class, 'handleOrderComplete']);

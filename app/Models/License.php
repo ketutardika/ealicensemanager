@@ -16,6 +16,7 @@ class License extends Model
      */
     protected $fillable = [
         'user_id',
+        'order_id',
         'license_key',
         'account_quota',
         'used_quota',
@@ -30,6 +31,19 @@ class License extends Model
         'last_renewal_date',
         'payment_status'
     ];
+
+    // License belongs to a user
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class, 'order_id');
+    }
+
+
 
     /**
      * The attributes that should be cast to native types.

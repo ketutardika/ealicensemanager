@@ -38,10 +38,10 @@ class LicenseValidationController extends Controller
         $licenseExpirationDate = ($license->license_expiration === 'lifetime') ? 'lifetime' : $license->license_expiration_date;
 
         // Check if the license status is expired
-        if ($license->status === 'expired') {
+        if ($license->status === 'expired' || $license->status === 'inactive') {
             return response()->json([                               
                 'account' => $accountMQL,
-                'account_status' => 'expired',           
+                'account_status' => 'inactive',           
                 'validation' => 'invalid',
                 'remaining_quota' => $license->used_quota . '/' . $license->account_quota,
                 'user_name' => $user ? $user->name : null,
@@ -73,6 +73,7 @@ class LicenseValidationController extends Controller
                     'license_expiration' => $license->license_expiration,                  
                     'license_expiration_date' => $licenseExpirationDate,
                     'license_status'=> $license->status,
+                    'message' => 'License Status Active'
                 ], 200);
             } else {
                 return response()->json([
@@ -115,6 +116,7 @@ class LicenseValidationController extends Controller
                     'license_expiration' => $license->license_expiration,
                     'license_expiration_date' => $licenseExpirationDate,
                     'license_status'=> $license->status,
+                    'message' => 'License Status Active'
                 ], 200);
             }
 
