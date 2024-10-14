@@ -14,8 +14,23 @@ class Order extends Model
         'user_id',
         'product_id',
         'product_name',
+        'total_purchase',
+        'currency',
         'language',
         'transaction_date',
+        'source',
     ];
-}
 
+    // Order belongs to a user
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    // Order belongs to a license
+    public function license()
+    {
+        return $this->hasOne(License::class, 'user_id', 'user_id');
+    }
+
+}

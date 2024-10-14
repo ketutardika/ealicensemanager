@@ -18,8 +18,8 @@ class AdminUserSeeder extends Seeder
         // Create an admin user
         User::create([
             'name' => 'admin',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('admin1234'), // Use Hash to securely hash the password
+            'email' => 'admin@yourrobotrader.com',
+            'password' => Hash::make('PBF8xCj=2V/<q,ub6t4kX3'),
             'role' => 'admin',
             'is_admin' => true, // Optional, if you are using an is_admin field
             'billing_country' => null, // Add other fields as necessary

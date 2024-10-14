@@ -15,9 +15,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
         $schedule->command('licenses:check-expired')->daily(); // Schedule to run daily
     }
+
 
     /**
      * Register the commands for the application.
