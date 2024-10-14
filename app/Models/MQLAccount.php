@@ -18,4 +18,10 @@ class MQLAccount extends Model
 
     // Specify the table name
     protected $table = 'mql_accounts';
+
+    public function license()
+    {
+        return $this->belongsTo(License::class, 'license_id');
+    }
+
 }

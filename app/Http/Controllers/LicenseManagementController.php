@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Str;
 use Carbon\Carbon; // Import Carbon for date manipulation
 
 class LicenseManagementController extends Controller
@@ -27,7 +27,8 @@ class LicenseManagementController extends Controller
             'currency' => 'required|string|size:3', // Validate currency as a required string of 3 characters            
             'account_quota' => 'required|string',
             'license_expiration' => 'required|string',
-            'language' => 'nullable|string',     
+            'language' => 'nullable|string',    
+            'source' => 'required|json', 
             'billing.email' => 'required|email',
             'billing.first_name' => 'nullable|string',
             'billing.last_name' => 'nullable|string',
@@ -41,6 +42,7 @@ class LicenseManagementController extends Controller
 
         // Extract billing email and other user information from the request
         $billingEmail = $request->input('billing.email');
+        $generatedPassword = $this->generateSecurePassword(); // Call the generate password function
 
         // Check if the user already exists in the database based on the billing email
         $user = User::where('email', $billingEmail)->first();
@@ -50,7 +52,7 @@ class LicenseManagementController extends Controller
             $user = User::create([
                 'name' => $request->input('billing.first_name') . ' ' . $request->input('billing.last_name'),
                 'email' => $billingEmail,
-                'password' => Hash::make('default_password'), // You may want to generate a random password or handle this securely
+                'password' => Hash::make($generatedPassword), // Store hashed password
                 'billing_country' => $request->input('billing.country'),
                 'billing_state' => $request->input('billing.state'),
                 'billing_city' => $request->input('billing.city'),
@@ -74,8 +76,14 @@ class LicenseManagementController extends Controller
                 'transaction_date' => now(),
                 'total_purchase' => $request->total_purchase, // Store the total purchase amount
                 'currency' => $request->currency, // Store the currency used for the transaction
+                'source' => $request->input('source'),
             ]
         );
+
+        // Ensure that the order has an ID (this should be set after `updateOrCreate`)
+        if (!$order || !$order->id) {
+            return response()->json(['message' => 'Failed to create or retrieve the order.'], 400);
+        }
 
         // Determine license expiration date based on license_expiration value
         $licenseExpiration = $this->calculateLicenseExpirationDate($request->input('license_expiration'));
@@ -83,17 +91,25 @@ class LicenseManagementController extends Controller
         // Generate a license for the user
         $license = License::create([
             'user_id' => $user->id,
+            'order_id' => $order->id,  // Associate the license with the order
             'license_key' => $this->generateLicenseKey(),
             'account_quota' => $request->input('account_quota'),
             'used_quota' => 0,
+            'source' => $request->input('source'),
             'license_creation_date' => now(),
             'license_expiration' => $request->input('license_expiration'),
             'license_expiration_date' => $licenseExpiration,
             'status' => 'active',
         ]);
 
-        // Respond back to WooCommerce or the API client
-        return response()->json(['message' => 'License created successfully', 'license_key' => $license->license_key], 201);
+         // Respond back to the client with additional information
+        return response()->json([
+            'message' => 'License created successfully',
+            'email' => $user->email,
+            'license_key' => $license->license_key,
+            'account_quota' => $license->account_quota,
+            'license_expiration' => $license->license_expiration,
+        ], 201);
     }
 
 
@@ -135,5 +151,28 @@ class LicenseManagementController extends Controller
             default:
                 return Carbon::now()->addYear(); // Default to 1 year if not specified
         }
+    }
+
+    // Add the password generation function as a private method
+    private function generateSecurePassword($length = 12)
+    {
+        $numbers = '0123456789';
+        $lowercase = 'abcdefghijklmnopqrstuvwxyz';
+        $uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $symbols = '!@#$%^&*()-_+=<>?';
+        $allCharacters = $numbers . $lowercase . $uppercase . $symbols;
+
+        $allCharacters = str_shuffle($allCharacters);
+
+        $password = substr(str_shuffle($numbers), 0, 1) . 
+                    substr(str_shuffle($lowercase), 0, 1) . 
+                    substr(str_shuffle($uppercase), 0, 1) . 
+                    substr(str_shuffle($symbols), 0, 1);
+
+        $remainingLength = $length - 4;
+        $password .= substr(str_shuffle($allCharacters), 0, $remainingLength);
+        $password = str_shuffle($password);
+
+        return $password;
     }
 }

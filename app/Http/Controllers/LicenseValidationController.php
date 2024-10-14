@@ -6,16 +6,25 @@ use App\Models\User;
 use App\Models\MQLAccount;
 use App\Models\License;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class LicenseValidationController extends Controller
 {
     public function validateLicense(Request $request)
     {
         // Validate the incoming request data
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'account_mql' => 'required|string',
             'license_key' => 'required|string',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'validation' => 'invalid',
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
 
         $accountMQL = $request->input('account_mql');
         $licenseKey = $request->input('license_key');
@@ -41,7 +50,7 @@ class LicenseValidationController extends Controller
         if ($license->status === 'expired') {
             return response()->json([                               
                 'account' => $accountMQL,
-                'account_status' => 'expired',           
+                'account_status' => 'inactive',           
                 'validation' => 'invalid',
                 'remaining_quota' => $license->used_quota . '/' . $license->account_quota,
                 'user_name' => $user ? $user->name : null,
@@ -51,6 +60,20 @@ class LicenseValidationController extends Controller
                 'license_expiration_date' => $licenseExpirationDate,
                 'license_status'=> $license->status,
                 'message' => 'License status expired'
+            ], 403);
+        } elseif ($license->status === 'inactive') {
+            return response()->json([                               
+                'account' => $accountMQL,
+                'account_status' => 'inactive',           
+                'validation' => 'invalid',
+                'remaining_quota' => $license->used_quota . '/' . $license->account_quota,
+                'user_name' => $user ? $user->name : null,
+                'user_email' => $user ? $user->email : null, 
+                'license_key'=> $maskedLicenseKey,
+                'license_expiration' => $license->license_expiration,                    
+                'license_expiration_date' => $licenseExpirationDate,
+                'license_status'=> $license->status,
+                'message' => 'License status inactive'
             ], 403);
         }
 
@@ -73,6 +96,7 @@ class LicenseValidationController extends Controller
                     'license_expiration' => $license->license_expiration,                  
                     'license_expiration_date' => $licenseExpirationDate,
                     'license_status'=> $license->status,
+                    'message' => 'License Status Active'
                 ], 200);
             } else {
                 return response()->json([
@@ -115,6 +139,7 @@ class LicenseValidationController extends Controller
                     'license_expiration' => $license->license_expiration,
                     'license_expiration_date' => $licenseExpirationDate,
                     'license_status'=> $license->status,
+                    'message' => 'License Status Active'
                 ], 200);
             }
 
