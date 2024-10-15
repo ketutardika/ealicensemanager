@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users');
             $table->integer('product_id')->nullable();
             $table->string('product_name')->nullable();
+            $table->string('program_sn')->nullable();
             $table->decimal('total_purchase', 10, 2)->nullable();
             $table->string('currency')->nullable();
             $table->string('language')->nullable();

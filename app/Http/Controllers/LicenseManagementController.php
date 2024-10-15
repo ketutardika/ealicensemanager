@@ -27,6 +27,7 @@ class LicenseManagementController extends Controller
             'currency' => 'required|string|size:3', // Validate currency as a required string of 3 characters            
             'account_quota' => 'required|string',
             'license_expiration' => 'required|string',
+            'program_sn' => 'required|string',
             'language' => 'nullable|string',    
             'source' => 'required|json', 
             'billing.email' => 'required|email',
@@ -71,6 +72,7 @@ class LicenseManagementController extends Controller
                 'user_id' => $user->id,
                 'product_id' => $request->product_id,
                 'product_name'=> $request->product_name,
+                'program_sn'=> $request->program_sn,
                 'language' => $request->language,
                 'order_id' => $request->order_id, // Explicitly set order_id here to ensure it is saved
                 'transaction_date' => now(),
