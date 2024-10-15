@@ -50,6 +50,7 @@ class LicenseController extends Controller
                 'order_id' => $license->order_id ? (int) $license->order_id : null,
                 'product_id' => $license->product_id,
                 'product_name' => $license->product_name,
+                'program_sn' => $license->program_sn,
                 'license_key' => $license->license_key,
                 'account_quota' => $license->account_quota,
                 'used_quota' => $license->used_quota,
