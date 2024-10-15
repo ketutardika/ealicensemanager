@@ -14,6 +14,7 @@ class Order extends Model
         'user_id',
         'product_id',
         'product_name',
+        'program_sn',
         'total_purchase',
         'currency',
         'language',
