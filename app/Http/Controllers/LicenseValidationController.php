@@ -51,7 +51,7 @@ class LicenseValidationController extends Controller
             // Return an error if the product_id doesn't match the order for the license
             return response()->json([
                 'validation' => 'invalid',
-                'message' => 'Invalid product ID for the given license key'
+                'message' => 'Invalid license key for the EA Program Product Version'
             ], 404);
         }
 
