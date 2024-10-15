@@ -15,7 +15,7 @@ class LicenseValidationController extends Controller
     {
         // Validate the incoming request data
         $validator = Validator::make($request->all(), [
-            'program_sn' => 'required|integer',  // Validate product_id
+            'program_sn' => 'required|string',  // Validate product_id
             'account_mql' => 'required|string',
             'license_key' => 'required|string',
         ]);
