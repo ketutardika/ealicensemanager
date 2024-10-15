@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\MQLAccount;
 use App\Models\License;
+use App\Models\Order;  // Ensure that the Order model is imported
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -14,6 +15,7 @@ class LicenseValidationController extends Controller
     {
         // Validate the incoming request data
         $validator = Validator::make($request->all(), [
+            'product_id' => 'required|integer',  // Validate product_id
             'account_mql' => 'required|string',
             'license_key' => 'required|string',
         ]);
@@ -28,13 +30,29 @@ class LicenseValidationController extends Controller
 
         $accountMQL = $request->input('account_mql');
         $licenseKey = $request->input('license_key');
+        $productId = $request->input('product_id');
 
         // Find the license by license_key
         $license = License::where('license_key', $licenseKey)->first();
 
         if (!$license) {
-            // If license doesn't exist, respond with an error
-            return response()->json(['message' => 'Invalid license key', 'validation' => 'invalid'], 404);
+            return response()->json([
+                'validation' => 'invalid',
+                'message' => 'Invalid license key'
+            ], 404);
+        }
+
+        // Check if the license is related to the correct product through the order
+        $order = Order::where('user_id', $license->user_id)
+                      ->where('product_id', $productId) // Check if product_id matches
+                      ->first();
+
+        if (!$order) {
+            // Return an error if the product_id doesn't match the order for the license
+            return response()->json([
+                'validation' => 'invalid',
+                'message' => 'Invalid product ID for the given license key'
+            ], 404);
         }
 
         // Fetch the user associated with this license
@@ -46,34 +64,20 @@ class LicenseValidationController extends Controller
         // Determine license_expiration_date to use in responses
         $licenseExpirationDate = ($license->license_expiration === 'lifetime') ? 'lifetime' : $license->license_expiration_date;
 
-        // Check if the license status is expired
+        // Check if the license status is expired or inactive
         if ($license->status === 'expired' || $license->status === 'inactive') {
-            return response()->json([                               
-                'account' => $accountMQL,
-                'account_status' => 'inactive',           
+            return response()->json([
                 'validation' => 'invalid',
+                'account' => $accountMQL,
+                'account_status' => 'inactive',
                 'remaining_quota' => $license->used_quota . '/' . $license->account_quota,
                 'user_name' => $user ? $user->name : null,
-                'user_email' => $user ? $user->email : null, 
-                'license_key'=> $maskedLicenseKey,
-                'license_expiration' => $license->license_expiration,                    
+                'user_email' => $user ? $user->email : null,
+                'license_key' => $maskedLicenseKey,
+                'license_expiration' => $license->license_expiration,
                 'license_expiration_date' => $licenseExpirationDate,
-                'license_status'=> $license->status,
-                'message' => 'License status expired'
-            ], 403);
-        } elseif ($license->status === 'inactive') {
-            return response()->json([                               
-                'account' => $accountMQL,
-                'account_status' => 'inactive',           
-                'validation' => 'invalid',
-                'remaining_quota' => $license->used_quota . '/' . $license->account_quota,
-                'user_name' => $user ? $user->name : null,
-                'user_email' => $user ? $user->email : null, 
-                'license_key'=> $maskedLicenseKey,
-                'license_expiration' => $license->license_expiration,                    
-                'license_expiration_date' => $licenseExpirationDate,
-                'license_status'=> $license->status,
-                'message' => 'License status inactive'
+                'license_status' => $license->status,
+                'message' => 'License status expired or inactive'
             ], 403);
         }
 
@@ -86,31 +90,31 @@ class LicenseValidationController extends Controller
             // If the account already exists, check if it's within quota
             if ($license->used_quota <= $license->account_quota) {
                 return response()->json([
+                    'validation' => 'valid',
                     'account' => $accountMQL,
                     'account_status' => 'active',
-                    'validation' => 'valid',
-                    'remaining_quota' => $license->used_quota . '/' . $license->account_quota,                    
+                    'remaining_quota' => $license->used_quota . '/' . $license->account_quota,
                     'user_name' => $user ? $user->name : null,
                     'user_email' => $user ? $user->email : null,
-                    'license_key'=> $maskedLicenseKey,
-                    'license_expiration' => $license->license_expiration,                  
+                    'license_key' => $maskedLicenseKey,
+                    'license_expiration' => $license->license_expiration,
                     'license_expiration_date' => $licenseExpirationDate,
-                    'license_status'=> $license->status,
+                    'license_status' => $license->status,
                     'message' => 'License Status Active'
                 ], 200);
             } else {
                 return response()->json([
+                    'validation' => 'invalid',
                     'account' => $accountMQL,
                     'account_status' => 'quota_exceeded',
-                    'validation' => 'invalid',
-                    'remaining_quota' => $license->used_quota . '/' . $license->account_quota,                    
+                    'remaining_quota' => $license->used_quota . '/' . $license->account_quota,
                     'user_name' => $user ? $user->name : null,
                     'user_email' => $user ? $user->email : null,
-                    'license_key'=> $maskedLicenseKey,
+                    'license_key' => $maskedLicenseKey,
                     'license_expiration' => $license->license_expiration,
                     'license_expiration_date' => $licenseExpirationDate,
-                    'license_status'=> $license->status,
-                    'message' => 'Quota Exceeded'
+                    'license_status' => $license->status,
+                    'message' => 'Quota exceeded'
                 ], 403);
             }
         } else {
@@ -127,35 +131,34 @@ class LicenseValidationController extends Controller
                 // Increment the used quota
                 $license->increment('used_quota');
 
-                // Respond with success and remaining quota
-                return response()->json([ 
+                return response()->json([
+                    'validation' => 'valid',
                     'account' => $accountMQL,
                     'account_status' => 'active',
-                    'validation' => 'valid',
-                    'remaining_quota' => $license->used_quota . '/' . $license->account_quota,                    
+                    'remaining_quota' => $license->used_quota . '/' . $license->account_quota,
                     'user_name' => $user ? $user->name : null,
                     'user_email' => $user ? $user->email : null,
-                    'license_key'=> $maskedLicenseKey,
+                    'license_key' => $maskedLicenseKey,
                     'license_expiration' => $license->license_expiration,
                     'license_expiration_date' => $licenseExpirationDate,
-                    'license_status'=> $license->status,
+                    'license_status' => $license->status,
                     'message' => 'License Status Active'
                 ], 200);
             }
 
             // Quota exceeded when trying to create a new account
             return response()->json([
+                'validation' => 'invalid',
                 'account' => $accountMQL,
                 'account_status' => 'quota_exceeded',
-                'validation' => 'invalid',
-                'remaining_quota' => $license->used_quota . '/' . $license->account_quota,                
+                'remaining_quota' => $license->used_quota . '/' . $license->account_quota,
                 'user_name' => $user ? $user->name : null,
                 'user_email' => $user ? $user->email : null,
-                'license_key'=> $maskedLicenseKey,
-                'license_expiration' => $license->license_expiration,               
+                'license_key' => $maskedLicenseKey,
+                'license_expiration' => $license->license_expiration,
                 'license_expiration_date' => $licenseExpirationDate,
-                'license_status'=> $license->status,
-                'message' => 'Quota Exceeded'
+                'license_status' => $license->status,
+                'message' => 'Quota exceeded'
             ], 403);
         }
     }
