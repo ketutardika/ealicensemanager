@@ -15,7 +15,7 @@ class LicenseValidationController extends Controller
     {
         // Validate the incoming request data
         $validator = Validator::make($request->all(), [
-            'product_id' => 'required|integer',  // Validate product_id
+            'program_sn' => 'required|integer',  // Validate product_id
             'account_mql' => 'required|string',
             'license_key' => 'required|string',
         ]);
@@ -30,7 +30,7 @@ class LicenseValidationController extends Controller
 
         $accountMQL = $request->input('account_mql');
         $licenseKey = $request->input('license_key');
-        $productId = $request->input('product_id');
+        $programSn = $request->input('program_sn');
 
         // Find the license by license_key
         $license = License::where('license_key', $licenseKey)->first();
@@ -44,7 +44,7 @@ class LicenseValidationController extends Controller
 
         // Check if the license is related to the correct product through the order
         $order = Order::where('user_id', $license->user_id)
-                      ->where('product_id', $productId) // Check if product_id matches
+                      ->where('program_sn', $programSn) // Check if product_id matches
                       ->first();
 
         if (!$order) {
