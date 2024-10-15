@@ -22,6 +22,7 @@ class OrderController extends Controller
             'user_id' => 'required|integer',
             'product_id' => 'required|integer',
             'product_name' => 'required|string',
+            'program_sn' => 'required|string',
             'language' => 'string|max:255',
             'status' => 'required|string',
         ]);
@@ -35,6 +36,7 @@ class OrderController extends Controller
             'user_id' => $request->input('user_id'),
             'product_id' => $request->input('product_id'),
             'product_name' => $request->input('product_name'),
+            'program_sn' => $request->input('program_sn'),
             'transaction_date' => $transactionDate,            
             'language' => $request->input('language'),
             'subscription_id'=> $request->input('status'),
@@ -59,6 +61,7 @@ class OrderController extends Controller
             'order_id' => 'integer',
             'product_id' => 'integer',
             'product_name' => 'string|max:255',
+            'program_sn' => 'string|max:255',
             'language' => 'string|max:255',
         ]);
 
