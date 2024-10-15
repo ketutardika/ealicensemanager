@@ -20,7 +20,7 @@ class LicenseController extends Controller
         // Build the query to filter licenses with user and order relationship
         $query = License::with(['user', 'order']) // Eager load related user and order
             ->leftJoin('orders', 'licenses.order_id', '=', 'orders.id') // Join licenses and orders on order_id
-            ->select('licenses.*', 'orders.order_id', 'orders.product_id', 'orders.product_name'); // Select necessary fields from both tables
+            ->select('licenses.*', 'orders.order_id', 'orders.product_id', 'orders.product_name', 'orders.program_sn'); // Select necessary fields from both tables
 
         // Apply search filter if a search query is provided
         if (!empty($searchQuery)) {
