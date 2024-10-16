@@ -148,7 +148,7 @@ class LicenseController extends Controller
         // Fetch licenses and related orders based on user_id
         $licenses = License::where('licenses.user_id', $user->id)
             ->leftJoin('orders', 'licenses.order_id', '=', 'orders.id') // Join on order_id
-            ->select('licenses.*', 'orders.order_id') // Select necessary fields
+            ->select('licenses.*', 'orders.order_id', 'orders.product_name') // Select necessary fields
             ->orderBy('licenses.created_at', 'desc')
             ->get();
 
@@ -156,6 +156,7 @@ class LicenseController extends Controller
         $filteredLicenses = $licenses->map(function ($license) {
             return [
                 'order_id' => $license->order_id ? (int)$license->order_id : null, // Ensure order_id is returned
+                'product_name' => $license->product_name, // Include product_name from orders
                 'license_key' => $license->license_key,
                 'account_quota' => $license->account_quota,
                 'used_quota' => $license->used_quota,
