@@ -208,7 +208,7 @@ class LicenseValidationController extends Controller
             'user_id' => $order ? $order->user_id : null,
             'product_id' => $order ? $order->product_id : null,
             'account_quota' => $license ? $license->account_quota : null,
-            'remaining_quota' => $license ? $license->used_quota . '/' . $license->account_quota : null,
+            'used_quota' => $license ? $license->used_quota . '/' . $license->account_quota : null,
         ]);
     }
 }

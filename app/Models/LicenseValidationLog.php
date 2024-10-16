@@ -20,6 +20,6 @@ class LicenseValidationLog extends Model
         'user_id',
         'product_id',
         'account_quota',
-        'remaining_quota',
+        'used_quota',
     ];
 }
