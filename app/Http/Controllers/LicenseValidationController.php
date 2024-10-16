@@ -43,7 +43,7 @@ class LicenseValidationController extends Controller
         }
 
         // Check if the license is related to the correct product through the order
-        $order = Order::where('order_id', $license->order_id)
+        $order = Order::where('id', $license->order_id)
                       ->where('program_sn', $programSn) // Check if product_id matches
                       ->first();
 
