@@ -198,9 +198,9 @@ class LicenseValidationController extends Controller
     private function logLicenseValidation($request, $validationStatus, $license = null, $order = null, $message = null)
     {
         LicenseValidationLog::create([
-            'program_sn' => $request->input('program_sn'),
-            'account_mql' => $request->input('account_mql'),
-            'license_key' => $request->input('license_key'),
+            'program_sn' => $request->input('program_sn') ?? null,
+            'account_mql' => $request->input('account_mql') ?? null,
+            'license_key' => $request->input('license_key') ?? null,
             'source' => $request->input('source') ?? null,
             'validation_status' => $validationStatus,
             'message_validation' => $message,
