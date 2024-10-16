@@ -10,9 +10,9 @@ class CreateLicenseValidationLogsTable extends Migration
     {
         Schema::create('license_validation_logs', function (Blueprint $table) {
             $table->id();
-            $table->string('program_sn');
-            $table->string('account_mql');
-            $table->string('license_key');
+            $table->string('program_sn')->nullable();
+            $table->string('account_mql')->nullable();
+            $table->string('license_key')->nullable();
             $table->text('source')->nullable();
             $table->enum('validation_status', ['valid', 'invalid']);
             $table->text('message_validation')->nullable();  // Store the validation message
