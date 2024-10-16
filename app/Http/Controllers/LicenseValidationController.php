@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\MQLAccount;
 use App\Models\License;
 use App\Models\Order;  // Ensure that the Order model is imported
+use App\Models\LicenseValidationLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -21,6 +22,7 @@ class LicenseValidationController extends Controller
         ]);
 
         if ($validator->fails()) {
+            $this->logLicenseValidation($request, 'invalid', null, null, $validator->errors()->first());
             return response()->json([
                 'validation' => 'invalid',
                 'message' => $validator->errors()->first(),
@@ -36,6 +38,8 @@ class LicenseValidationController extends Controller
         $license = License::where('license_key', $licenseKey)->first();
 
         if (!$license) {
+            // Log invalid validation
+            $this->logLicenseValidation($request, 'invalid', null, null, 'Invalid license key');
             return response()->json([
                 'validation' => 'invalid',
                 'message' => 'Invalid license key'
@@ -48,7 +52,8 @@ class LicenseValidationController extends Controller
                       ->first();
 
         if (!$order) {
-            // Return an error if the product_id doesn't match the order for the license
+            // Log invalid validation
+            $this->logLicenseValidation($request, 'invalid', null, null, 'Invalid license key for the EA Program Product Version');
             return response()->json([
                 'validation' => 'invalid',
                 'message' => 'Invalid license key for the EA Program Product Version'
@@ -66,6 +71,7 @@ class LicenseValidationController extends Controller
 
         // Check if the license status is expired or inactive
         if ($license->status === 'expired' || $license->status === 'inactive') {
+            $this->logLicenseValidation($request, 'invalid', $license, $order, 'License status expired or inactive');
             return response()->json([
                 'validation' => 'invalid',
                 'account' => $accountMQL,
@@ -89,6 +95,8 @@ class LicenseValidationController extends Controller
         if ($mqlAccount) {
             // If the account already exists, check if it's within quota
             if ($license->used_quota <= $license->account_quota) {
+                // Log valid validation
+                $this->logLicenseValidation($request, 'valid', $license, $order, 'License Status Active');
                 return response()->json([
                     'validation' => 'valid',
                     'account' => $accountMQL,
@@ -103,6 +111,8 @@ class LicenseValidationController extends Controller
                     'message' => 'License Status Active'
                 ], 200);
             } else {
+                // Log quota exceeded
+                $this->logLicenseValidation($request, 'invalid', $license, $order, 'Quota Exceeded');
                 return response()->json([
                     'validation' => 'invalid',
                     'account' => $accountMQL,
@@ -131,6 +141,8 @@ class LicenseValidationController extends Controller
                 // Increment the used quota
                 $license->increment('used_quota');
 
+                // Log valid validation
+                $this->logLicenseValidation($request, 'valid', $license, $order, 'New MQL account created. License Status Active');
                 return response()->json([
                     'validation' => 'valid',
                     'account' => $accountMQL,
@@ -146,6 +158,8 @@ class LicenseValidationController extends Controller
                 ], 200);
             }
 
+            // Log quota exceeded
+            $this->logLicenseValidation($request, 'invalid', $license, $order, 'Quota Exceeded when trying to create a new account');
             // Quota exceeded when trying to create a new account
             return response()->json([
                 'validation' => 'invalid',
@@ -177,5 +191,24 @@ class LicenseValidationController extends Controller
 
         // Join the parts back together with dashes
         return implode('-', $parts);
+    }
+
+    // Helper function to log the license validation details
+    // Log License Validation function
+    private function logLicenseValidation($request, $validationStatus, $license = null, $order = null, $message = null)
+    {
+        LicenseValidationLog::create([
+            'program_sn' => $request->input('program_sn'),
+            'account_mql' => $request->input('account_mql'),
+            'license_key' => $request->input('license_key'),
+            'source' => $request->input('source') ?? null,
+            'validation_status' => $validationStatus,
+            'message_validation' => $message,
+            'order_id' => $license ? $license->order_id : null,
+            'user_id' => $order ? $order->user_id : null,
+            'product_id' => $order ? $order->product_id : null,
+            'account_quota' => $license ? $license->account_quota : null,
+            'remaining_quota' => $license ? $license->used_quota . '/' . $license->account_quota : null,
+        ]);
     }
 }
