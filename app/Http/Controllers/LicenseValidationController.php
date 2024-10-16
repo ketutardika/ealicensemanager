@@ -177,6 +177,17 @@ class LicenseValidationController extends Controller
         }
     }
 
+    public function validateLicenselogs(Request $request)
+    {
+        // Fetch the validation logs, order by `created_at` (date) descending
+        $logs = LicenseValidationLog::select('id', 'program_sn', 'account_mql', 'license_key', 'validation_status', 'created_at as date')
+                                    ->orderBy('created_at', 'DESC')
+                                    ->get();
+
+        // Return the logs as JSON response
+        return response()->json($logs);
+    }
+
     // Helper function to mask the license key
     private function maskLicenseKey($licenseKey)
     {
