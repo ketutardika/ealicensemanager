@@ -20,7 +20,7 @@ class CreateLicenseValidationLogsTable extends Migration
             $table->unsignedBigInteger('user_id')->nullable();
             $table->unsignedBigInteger('product_id')->nullable();
             $table->integer('account_quota')->nullable();
-            $table->text('remaining_quota')->nullable();
+            $table->string('remaining_quota')->nullable();
             $table->timestamps();
         });
     }
