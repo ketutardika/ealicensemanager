@@ -78,5 +78,6 @@ Route::prefix('v1')->group(function () {
 
         // License Validation for EA Program
         Route::post('/validate-license', [LicenseValidationController::class, 'validateLicense']);
+        Route::get('/validate-license-logs', [LicenseValidationController::class, 'validateLicenselogs']);
     });
 });

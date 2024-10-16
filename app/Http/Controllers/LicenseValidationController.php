@@ -177,6 +177,20 @@ class LicenseValidationController extends Controller
         }
     }
 
+    public function validateLicenselogs(Request $request)
+    {
+        // Set the per-page limit, you can pass it as a query parameter or set a default value
+        $perPage = $request->query('limit', 10);  // Default to 10 items per page
+
+        // Fetch the validation logs with pagination, ordered by `created_at` (date) descending
+        $logs = LicenseValidationLog::select('id', 'program_sn', 'account_mql', 'license_key', 'validation_status', 'message_validation', 'created_at as date')
+                                    ->orderBy('created_at', 'DESC')
+                                    ->paginate($perPage);  // Use the paginate method
+
+        // Return the paginated logs as JSON response
+        return response()->json($logs);
+    }
+
     // Helper function to mask the license key
     private function maskLicenseKey($licenseKey)
     {
