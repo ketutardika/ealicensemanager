@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
@@ -12,6 +13,20 @@ class Handler extends ExceptionHandler
      *
      * @var string[]
      */
+    protected function unauthenticated($request, AuthenticationException $exception)
+    {
+        // Customize response for API routes
+        if ($request->expectsJson()) {
+            return response()->json([
+                'validation' => 'invalid',
+                'message' => 'You need to be authenticated to access this resource.'
+            ], 401);
+        }
+
+        // Default behavior for web routes (redirect)
+        return redirect()->guest(route('login'));
+    }
+    
     protected $dontReport = [
         //
     ];
