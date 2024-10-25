@@ -33,6 +33,8 @@ class LicenseValidationController extends Controller
         $accountMQL = $request->input('account_mql');
         $licenseKey = $request->input('license_key');
         $programSn = $request->input('program_sn');
+        // Define the bundle program serial number
+        $bundleSn = 'SN-YRTEA-BUNDLE-MT4-MT5';
 
         // Find the license by license_key
         $license = License::where('license_key', $licenseKey)->first();
@@ -48,7 +50,11 @@ class LicenseValidationController extends Controller
 
         // Check if the license is related to the correct product through the order
         $order = Order::where('id', $license->order_id)
-                      ->where('program_sn', $programSn) // Check if product_id matches
+                      ->where(function ($query) use ($programSn, $bundleSn) {
+                          // Check if the program_sn matches either the user input or the bundle program serial number
+                          $query->where('program_sn', $programSn)
+                                ->orWhere('program_sn', $bundleSn);
+                      })
                       ->first();
 
         if (!$order) {
